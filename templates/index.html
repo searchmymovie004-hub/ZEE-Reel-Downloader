@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b16">
+  <meta name="description" content="Download public Instagram Reels as MP4 video or MP3 audio.">
+  <title>ZEE Reel Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="ZEE home"><span class="brand-mark">Z</span><span>ZEE <b>BOTS</b></span></a>
+    <nav class="nav-links" aria-label="Primary navigation"><a href="#home">Home</a><a href="#how-it-works">How it works</a><a href="#features">Features</a><a href="#faq">FAQ</a></nav>
+    <a class="header-cta" href="#downloader">Get started <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="eyebrow"><span class="pulse-dot"></span> Fast. Private. Effortless.</div>
+      <h1>Keep the moments<br><em>that matter.</em></h1>
+      <p class="hero-copy">Download public Instagram Reels in seconds. Save your favorite videos as crisp MP4s or extract the audio as MP3.</p>
+      <a href="#downloader" class="primary-button hero-button">Start downloading <span>↓</span></a>
+      <div class="hero-note"><span>🔒</span> Public links only &nbsp;·&nbsp; No account required</div>
+    </section>
+
+    <section class="downloader-section" id="downloader">
+      <div class="section-label">01 / Downloader</div>
+      <div class="downloader-card">
+        <div class="card-heading"><div><h2>Paste your Reel link</h2><p>We’ll fetch the publicly available media for you.</p></div><div class="card-icon">↘</div></div>
+        <form id="download-form" novalidate>
+          <label class="sr-only" for="reel-url">Instagram Reel URL</label>
+          <div class="input-wrap"><span class="input-prefix">instagram.com/</span><input id="reel-url" name="url" type="url" autocomplete="url" inputmode="url" placeholder="Paste Instagram Reel link here..." required><button id="paste-button" class="paste-button" type="button">Paste</button></div>
+          <button id="download-button" class="primary-button download-button" type="submit"><span class="button-label">Download Reel</span><span class="button-spinner" aria-hidden="true"></span><span class="button-arrow">→</span></button>
+        </form>
+        <div id="status" class="status" role="alert" aria-live="polite"></div>
+        <div id="result" class="result-card" hidden>
+          <div class="result-top"><div class="success-icon">✓</div><div><h3>Your Reel is ready</h3><p>Choose a format below. Links expire automatically.</p></div></div>
+          <div class="download-options"><a id="video-link" class="format-button" download><span>🎬</span><span><b>Download MP4</b><small>Video file</small></span><strong>↓</strong></a><a id="audio-link" class="format-button" download><span>🎵</span><span><b>Download MP3</b><small>Audio file</small></span><strong>↓</strong></a></div>
+          <button id="again-button" class="again-button" type="button">↻ &nbsp; Download again</button>
+        </div>
+        <p class="legal-note">By using ZEE, you confirm you have permission to download this content. <a href="#faq">Learn more</a></p>
+      </div>
+    </section>
+
+    <section class="how-section content-section" id="how-it-works"><div class="section-label">02 / How it works</div><div class="section-intro"><h2>Three simple steps.<br><em>Zero friction.</em></h2><p>Designed to get you from link to saved moment without the clutter.</p></div><div class="steps"><article><span>01</span><div class="step-icon">⌁</div><h3>Copy the link</h3><p>Open Instagram and copy the link to any public Reel you want to keep.</p></article><article><span>02</span><div class="step-icon">⌘</div><h3>Paste it here</h3><p>Drop the link into the downloader above. No sign-in or account is needed.</p></article><article><span>03</span><div class="step-icon">↓</div><h3>Save your format</h3><p>Choose MP4 for video or MP3 for audio and start enjoying it offline.</p></article></div></section>
+
+    <section class="features-section content-section" id="features"><div class="section-label">03 / Why ZEE</div><div class="section-intro"><h2>Small tool.<br><em>Big utility.</em></h2></div><div class="feature-grid"><div><span>✦</span><h3>Fast processing</h3><p>Quick, focused processing with clear progress feedback.</p></div><div><span>◉</span><h3>Made for mobile</h3><p>A touch-friendly experience for phones, tablets, and desktop.</p></div><div><span>◌</span><h3>Secure by design</h3><p>Temporary files are automatically removed after a short period.</p></div><div><span>↗</span><h3>Two formats</h3><p>Keep the complete Reel or take only the sound with MP3.</p></div></div></section>
+
+    <section class="faq-section content-section" id="faq"><div class="section-label">04 / FAQ</div><div class="section-intro"><h2>Good to<br><em>know.</em></h2></div><div class="faq-list"><details open><summary>What links can I download?<span>+</span></summary><p>ZEE supports publicly accessible Instagram Reel URLs only. Private accounts, login-required content, and restricted media are not supported.</p></details><details><summary>Is my Instagram account needed?<span>+</span></summary><p>No. ZEE never asks for your Instagram password or account credentials.</p></details><details><summary>Why did processing fail?<span>+</span></summary><p>Instagram can change its delivery systems, or a Reel may be unavailable, private, or restricted. Please verify the link and try again.</p></details><details><summary>Can I download any content?<span>+</span></summary><p>Only download content you created or have permission to save. Respect copyright, privacy, and Instagram’s terms of use.</p></details></div></section>
+  </main>
+  <footer><a class="brand" href="#home"><span class="brand-mark">Z</span><span>ZEE <b>BOTS</b></span></a><p>Built for the moments worth keeping.</p><span>© 2026 ZEE BOTS</span></footer>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
