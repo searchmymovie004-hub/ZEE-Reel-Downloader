@@ -85,8 +85,8 @@ def is_public_reel_url(value: object) -> bool:
         return False
     if parsed.username or parsed.password or parsed.port:
         return False
-    if parsed.query or parsed.fragment:
-        # Query parameters are not necessary for a canonical public reel link.
+    if parsed.fragment:
+        # Fragments are client-side only and are not needed for extraction.
         return False
     return bool(REEL_PATH.fullmatch(parsed.path))
 
