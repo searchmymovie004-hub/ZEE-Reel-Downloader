@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": false,
+    "zee-reel-downloader": {
+      "stats": {
+        "downloads": {
+          ".read": true,
+          ".write": "(!data.exists() && newData.isNumber() && newData.val() == 1) || (data.exists() && data.isNumber() && newData.isNumber() && newData.val() == data.val() + 1)",
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        }
+      },
+      "reviews": {
+        ".read": true,
+        "$reviewId": {
+          ".write": "!data.exists() && newData.hasChildren(['rating', 'createdAt'])",
+          ".validate": "newData.hasChildren(['rating', 'createdAt']) && newData.child('rating').isNumber() && newData.child('rating').val() >= 1 && newData.child('rating').val() <= 5 && newData.child('message').isString() && newData.child('message').val().length <= 280 && newData.child('createdAt').isNumber()"
+        }
+      }
+    }
+  }
+}
