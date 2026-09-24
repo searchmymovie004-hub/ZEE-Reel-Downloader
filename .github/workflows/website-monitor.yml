@@ -1,0 +1,26 @@
+name: ZEE website monitor
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      CRONITOR_API_KEY: ${{ secrets.CRONITOR_API_KEY }}
+      CRONITOR_MONITOR_KEY: zee-reel-website-10m
+      WEBSITE_URL: https://zee-reel-downloader.onrender.com/
+    steps:
+      - name: Check out monitor
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Cronitor SDK
+        run: pip install --disable-pip-version-check 'cronitor>=4.7.0'
+      - name: Check website and send Cronitor telemetry
+        run: python cron_monitor.py

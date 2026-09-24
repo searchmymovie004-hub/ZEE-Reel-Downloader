@@ -51,3 +51,5 @@ Before enabling the live counters and reviews, copy the contents of `database.ru
 ## Website health Cron Job
 
 `cron_monitor.py` is designed to run on Render every 10 minutes. It checks the public Render URL and reports `run`, `complete`, or `fail` telemetry to Cronitor. Configure `CRONITOR_API_KEY`, `CRONITOR_MONITOR_KEY` (default: `zee-reel-website-10m`), and `WEBSITE_URL` as Render Cron Job environment variables. This provides monitoring and telemetry; it does not override Render Free plan sleep behavior or guarantee that the web service stays continuously awake.
+
+Render Cron Jobs require a paid plan. For a no-cost alternative, `.github/workflows/website-monitor.yml` runs the same check from GitHub Actions every 10 minutes. Add the supplied key as a GitHub Actions repository secret named `CRONITOR_API_KEY`; scheduled GitHub Actions can occasionally be delayed by GitHub during high load.
