@@ -47,3 +47,7 @@ This application does not accept private links, login credentials, cookies, arbi
 The frontend uses the supplied Firebase project configuration through Firebase's browser ESM modules. It stores the total successful downloader count at `zee-reel-downloader/stats/downloads` and anonymous reviews at `zee-reel-downloader/reviews`. No user login or account creation is used.
 
 Before enabling the live counters and reviews, copy the contents of `database.rules.json` into the Firebase Realtime Database Rules editor, or deploy it with the Firebase CLI from a trusted environment. The rules allow public reads for the displayed aggregate data, permit only +1 download transactions, and validate anonymous reviews to 1–5 stars with a maximum 280-character message. Because reviews are intentionally anonymous, public database writes can still be abused; monitor usage and add App Check or a server-side moderation endpoint if the site receives significant traffic.
+
+## Website health Cron Job
+
+`cron_monitor.py` is designed to run on Render every 10 minutes. It checks the public Render URL and reports `run`, `complete`, or `fail` telemetry to Cronitor. Configure `CRONITOR_API_KEY`, `CRONITOR_MONITOR_KEY` (default: `zee-reel-website-10m`), and `WEBSITE_URL` as Render Cron Job environment variables. This provides monitoring and telemetry; it does not override Render Free plan sleep behavior or guarantee that the web service stays continuously awake.
