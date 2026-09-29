@@ -24,6 +24,11 @@ const form = document.querySelector('#download-form');
 const input = document.querySelector('#reel-url');
 const pasteButton = document.querySelector('#paste-button');
 const downloadButton = document.querySelector('#download-button');
+const previewButton = document.querySelector('#preview-button');
+const previewCard = document.querySelector('#preview-card');
+const previewImage = document.querySelector('#preview-image');
+const previewTitle = document.querySelector('#preview-title');
+const previewCreator = document.querySelector('#preview-creator');
 const videoQuality = document.querySelector('#video-quality');
 const audioQuality = document.querySelector('#audio-quality');
 const status = document.querySelector('#status');
@@ -107,6 +112,32 @@ renderHistory();
 pasteButton.addEventListener('click', async () => {
   try { input.value = await navigator.clipboard.readText(); input.focus(); status.textContent = ''; }
   catch { input.focus(); status.textContent = 'Paste permission was unavailable. Please paste the link manually.'; }
+});
+
+previewButton.addEventListener('click', async () => {
+  const url = input.value.trim();
+  if (!url) { showError('Paste a public Instagram link before previewing.'); input.focus(); return; }
+  previewButton.disabled = true;
+  previewButton.textContent = 'Loading preview…';
+  try {
+    const response = await fetch('/api/preview', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({url})});
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.success) throw new Error(data.error || 'Preview unavailable.');
+    previewTitle.textContent = data.title || 'Public Instagram media';
+    previewCreator.textContent = data.creator || 'Instagram';
+    if (data.thumbnail) { previewImage.src = data.thumbnail; previewImage.hidden = false; } else previewImage.hidden = true;
+    previewCard.hidden = false;
+    status.textContent = data.preview_available === false ? 'Thumbnail details are unavailable, but this public link can still be downloaded.' : '';
+  } catch (error) {
+    previewTitle.textContent = 'Public Instagram media';
+    previewCreator.textContent = 'Ready to try downloading';
+    previewImage.hidden = true;
+    previewCard.hidden = false;
+    status.textContent = error.message || 'Preview details unavailable. You can still download this link.';
+  } finally {
+    previewButton.disabled = false;
+    previewButton.innerHTML = 'Preview link <span>✦</span>';
+  }
 });
 
 async function requestDownload(url, payload) {

@@ -284,7 +284,8 @@ def api_preview():
         info = info or {}
         return jsonify(success=True, title=info.get("title") or "Public Instagram media", creator=info.get("uploader") or "Instagram", thumbnail=info.get("thumbnail"))
     except Exception:
-        return jsonify(success=False, error="Preview unavailable. You can still try the download."), 422
+        # Instagram often blocks metadata requests while still allowing a public download attempt.
+        return jsonify(success=True, preview_available=False, title="Public Instagram media", creator="Instagram", thumbnail=None)
 
 
 @app.post("/api/download")
