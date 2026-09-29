@@ -50,7 +50,13 @@ _rate_lock = threading.Lock()
 _rate_buckets = defaultdict(deque)
 
 INSTAGRAM_HOSTS = {"instagram.com", "www.instagram.com"}
-INSTAGRAM_MEDIA_PATH = re.compile(r"^(?:/(?:reel|p|tv)/[A-Za-z0-9_-]+/?|/stories/[A-Za-z0-9_.-]+/(?:[0-9]+|highlights/[0-9]+)/?)$")
+INSTAGRAM_MEDIA_PATH = re.compile(
+    r"^(?:"
+    r"/(?:reel|p|tv)/[A-Za-z0-9_-]+/?"
+    r"|/share/(?:reel|p)/[A-Za-z0-9_-]+/?"
+    r"|/stories/(?:[A-Za-z0-9_.-]+/(?:[0-9]+|highlights/[0-9]+)|highlights/[0-9]+)/?"
+    r")$"
+)
 
 
 def client_key() -> str:
@@ -305,7 +311,7 @@ def api_preview():
     payload = request.get_json(silent=True) or {}
     url = str(payload.get("url", "")).strip()
     if not is_public_reel_url(url):
-        return jsonify(success=False, error="Enter a valid public Instagram media URL."), 400
+        return jsonify(success=False, error="Enter a valid public Instagram Reel, post, story, or IGTV URL."), 400
     try:
         with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True, "skip_download": True, "socket_timeout": 15, "noplaylist": True}) as downloader:
             info = downloader.extract_info(url, download=False)
@@ -327,7 +333,7 @@ def api_download():
     video_quality = str(payload.get("video_quality", "best"))
     audio_quality = str(payload.get("audio_quality", "192"))
     if not is_public_reel_url(url):
-        return jsonify(success=False, error="Enter a valid public Instagram Reel, post, IGTV, or story URL."), 400
+        return jsonify(success=False, error="Enter a valid public Instagram Reel, post, story, or IGTV URL."), 400
 
     token = uuid.uuid4().hex
     try:
@@ -337,18 +343,18 @@ def api_download():
         shutil.rmtree(DOWNLOAD_DIR / token, ignore_errors=True)
         message = str(exc).lower()
         if any(term in message for term in ("login", "private", "authentication")):
-            error = "This Reel appears to be private or requires authentication. Only public Reels are supported."
+            error = "This Instagram media appears to be private or requires authentication. Only public media is supported."
         elif "timed out" in message or "timeout" in message:
             error = "Instagram took too long to respond. Please try again."
         else:
-            error = "Unable to process this public Reel. Instagram may have changed its systems."
-        logger.info("Public Reel processing failed: %s", type(exc).__name__)
+            error = "Unable to process this public Instagram media. Instagram may have changed its systems."
+        logger.info("Public Instagram media processing failed: %s", type(exc).__name__)
         return jsonify(success=False, error=error), 422
     except Exception:
         METRICS["errors"] += 1
         shutil.rmtree(DOWNLOAD_DIR / token, ignore_errors=True)
         logger.exception("Unexpected media processing failure")
-        return jsonify(success=False, error="The Reel could not be processed right now. Please try again."), 500
+        return jsonify(success=False, error="The Instagram media could not be processed right now. Please try again."), 500
 
     METRICS["downloads"] += 1
     return jsonify(
