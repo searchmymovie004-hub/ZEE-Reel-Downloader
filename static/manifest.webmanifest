@@ -1,0 +1,10 @@
+{
+  "name": "NEXORA DOWNLOADER",
+  "short_name": "NEXORA",
+  "description": "Fast public Instagram media downloader",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050914",
+  "theme_color": "#050914",
+  "icons": [{"src":"/static/nexora-logo.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]
+}

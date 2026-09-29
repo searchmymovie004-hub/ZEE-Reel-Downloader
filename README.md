@@ -63,3 +63,9 @@ Render Cron Jobs require a paid plan. For a no-cost alternative, `.github/workfl
 - MP4 video quality selection and MP3 bitrate selection.
 - Copy-site-link, Telegram share, and WhatsApp share actions.
 - SEO metadata, Open Graph/Twitter cards, `robots.txt`, and `sitemap.xml`.
+
+## NEXORA feature expansion
+
+The site now includes an installable PWA shell, link preview endpoint, staged download progress, Malayalam/English toggle, WhatsApp sharing, privacy page, and clearer public-media guidance. The preview endpoint never downloads media; it only asks yt-dlp for publicly available metadata.
+
+The admin area is available at `/admin/login`. The configured Render environment variables are `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SECRET_KEY`; credentials are intentionally not stored in Git. Change them from Render Environment Variables before sharing access. The dashboard is protected by a signed session and does not expose Firebase credentials or private media.

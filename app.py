@@ -7,11 +7,13 @@ import threading
 import time
 import uuid
 from collections import defaultdict, deque
+from functools import wraps
 from pathlib import Path
 from urllib.parse import urlparse
 
-from flask import Flask, Response, jsonify, render_template, request, send_from_directory
+from flask import Flask, Response, jsonify, render_template, request, send_from_directory, session, redirect, url_for
 from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.security import check_password_hash
 
 import yt_dlp
 
@@ -32,6 +34,10 @@ RATE_LIMIT_WINDOW = int(os.environ.get("RATE_LIMIT_WINDOW", "600"))
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024  # JSON request body limit.
 app.config["JSON_SORT_KEYS"] = False
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-secret-key-in-render")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("COOKIE_SECURE", "true").lower() == "true"
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("zee-reel-downloader")
@@ -89,6 +95,19 @@ def is_public_reel_url(value: object) -> bool:
         # Fragments are client-side only and are not needed for extraction.
         return False
     return bool(INSTAGRAM_MEDIA_PATH.fullmatch(parsed.path))
+
+
+def admin_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not session.get("admin_authenticated"):
+            return redirect(url_for("admin_login"))
+        return view(*args, **kwargs)
+    return wrapped
+
+
+def configured_admin_password() -> str:
+    return os.environ.get("ADMIN_PASSWORD", "risham004")
 
 
 def ffmpeg_path() -> str | None:
@@ -206,6 +225,66 @@ def sitemap():
         "</urlset>",
         mimetype="application/xml",
     )
+
+
+@app.get("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
+@app.get("/manifest.webmanifest")
+def manifest():
+    return send_from_directory(BASE_DIR / "static", "manifest.webmanifest", mimetype="application/manifest+json")
+
+
+@app.get("/sw.js")
+def service_worker():
+    return send_from_directory(BASE_DIR / "static", "sw.js", mimetype="application/javascript")
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        expected_user = os.environ.get("ADMIN_USERNAME", "nexora")
+        expected_password = configured_admin_password()
+        valid_password = check_password_hash(expected_password, password) if expected_password.startswith(("scrypt:", "pbkdf2:")) else password == expected_password
+        if username == expected_user and valid_password:
+            session.clear()
+            session["admin_authenticated"] = True
+            return redirect(url_for("admin_dashboard"))
+        return render_template("admin_login.html", error="Invalid username or password."), 401
+    return render_template("admin_login.html")
+
+
+@app.get("/admin/logout")
+def admin_logout():
+    session.clear()
+    return redirect(url_for("admin_login"))
+
+
+@app.get("/admin")
+@admin_required
+def admin_dashboard():
+    return render_template("admin.html", stats={"downloads": "Firebase", "reviews": "Firebase", "avg_rating": "Live"})
+
+
+@app.post("/api/preview")
+def api_preview():
+    if rate_limited(f"preview:{client_key()}"):
+        return jsonify(success=False, error="Preview limit reached. Please wait a few minutes."), 429
+    payload = request.get_json(silent=True) or {}
+    url = str(payload.get("url", "")).strip()
+    if not is_public_reel_url(url):
+        return jsonify(success=False, error="Enter a valid public Instagram media URL."), 400
+    try:
+        with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True, "skip_download": True, "socket_timeout": 15, "noplaylist": True}) as downloader:
+            info = downloader.extract_info(url, download=False)
+        info = info or {}
+        return jsonify(success=True, title=info.get("title") or "Public Instagram media", creator=info.get("uploader") or "Instagram", thumbnail=info.get("thumbnail"))
+    except Exception:
+        return jsonify(success=False, error="Preview unavailable. You can still try the download."), 422
 
 
 @app.post("/api/download")
