@@ -30,6 +30,9 @@ FILE_TTL_SECONDS = int(os.environ.get("FILE_TTL_SECONDS", "1800"))
 MAX_DOWNLOAD_BYTES = int(os.environ.get("MAX_DOWNLOAD_BYTES", str(150 * 1024 * 1024)))
 RATE_LIMIT_COUNT = int(os.environ.get("RATE_LIMIT_COUNT", "5"))
 RATE_LIMIT_WINDOW = int(os.environ.get("RATE_LIMIT_WINDOW", "600"))
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "https://zee-reel-downloader.onrender.com").rstrip("/")
+METRICS = {"downloads": 0, "preview_requests": 0, "preview_fallbacks": 0, "errors": 0, "started_at": time.time()}
+MAINTENANCE_OVERRIDE = False
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024  # JSON request body limit.
@@ -205,15 +208,21 @@ def process_reel(url: str, token: str, video_quality: str = "best", audio_qualit
     return video_path, audio_path
 
 
+def maintenance_active():
+    return MAINTENANCE_OVERRIDE or os.environ.get("MAINTENANCE_MODE", "false").lower() == "true"
+
+
 @app.get("/")
 def index():
     cleanup_expired()
+    if maintenance_active():
+        return render_template("maintenance.html"), 503
     return render_template("index.html")
 
 
 @app.get("/robots.txt")
 def robots():
-    return Response("User-agent: *\nAllow: /\nSitemap: https://zee-reel-downloader.onrender.com/sitemap.xml\n", mimetype="text/plain")
+    return Response(f"User-agent: *\nAllow: /\nSitemap: {PUBLIC_BASE_URL}/sitemap.xml\n", mimetype="text/plain")
 
 
 @app.get("/sitemap.xml")
@@ -221,7 +230,7 @@ def sitemap():
     return Response(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
         "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
-        "<url><loc>https://zee-reel-downloader.onrender.com/</loc></url>"
+        f"<url><loc>{PUBLIC_BASE_URL}/</loc></url>"
         "</urlset>",
         mimetype="application/xml",
     )
@@ -264,14 +273,31 @@ def admin_logout():
     return redirect(url_for("admin_login"))
 
 
+@app.get("/api/health")
+def health():
+    return jsonify(status="ok", maintenance=maintenance_active(), metrics={k: v for k, v in METRICS.items() if k != "started_at"})
+
+
 @app.get("/admin")
 @admin_required
 def admin_dashboard():
-    return render_template("admin.html", stats={"downloads": "Firebase", "reviews": "Firebase", "avg_rating": "Live"})
+    stats = dict(METRICS)
+    stats["uptime_minutes"] = int((time.time() - METRICS["started_at"]) / 60)
+    stats["maintenance"] = maintenance_active()
+    return render_template("admin.html", stats=stats)
+
+
+@app.post("/admin/maintenance")
+@admin_required
+def toggle_maintenance():
+    global MAINTENANCE_OVERRIDE
+    MAINTENANCE_OVERRIDE = request.form.get("enabled") == "true"
+    return redirect(url_for("admin_dashboard"))
 
 
 @app.post("/api/preview")
 def api_preview():
+    METRICS["preview_requests"] += 1
     if rate_limited(f"preview:{client_key()}"):
         return jsonify(success=False, error="Preview limit reached. Please wait a few minutes."), 429
     payload = request.get_json(silent=True) or {}
@@ -284,6 +310,7 @@ def api_preview():
         info = info or {}
         return jsonify(success=True, title=info.get("title") or "Public Instagram media", creator=info.get("uploader") or "Instagram", thumbnail=info.get("thumbnail"))
     except Exception:
+        METRICS["preview_fallbacks"] += 1
         # Instagram often blocks metadata requests while still allowing a public download attempt.
         return jsonify(success=True, preview_available=False, title="Public Instagram media", creator="Instagram", thumbnail=None)
 
@@ -304,6 +331,7 @@ def api_download():
     try:
         process_reel(url, token, video_quality, audio_quality)
     except yt_dlp.utils.DownloadError as exc:
+        METRICS["errors"] += 1
         shutil.rmtree(DOWNLOAD_DIR / token, ignore_errors=True)
         message = str(exc).lower()
         if any(term in message for term in ("login", "private", "authentication")):
@@ -315,10 +343,12 @@ def api_download():
         logger.info("Public Reel processing failed: %s", type(exc).__name__)
         return jsonify(success=False, error=error), 422
     except Exception:
+        METRICS["errors"] += 1
         shutil.rmtree(DOWNLOAD_DIR / token, ignore_errors=True)
         logger.exception("Unexpected media processing failure")
         return jsonify(success=False, error="The Reel could not be processed right now. Please try again."), 500
 
+    METRICS["downloads"] += 1
     return jsonify(
         success=True,
         video_url=f"/media/{token}/video",

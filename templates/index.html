@@ -17,6 +17,7 @@
   <meta name="twitter:image" content="{{ url_for('static', filename='nexora-logo.png', _external=True) }}">
   <meta name="google-site-verification" content="9r8XW3g8YytoRn7-m923CnxOIgA16n06yfOTkubQ7w4">
   <link rel="canonical" href="{{ request.url_root }}">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"NEXORA DOWNLOADER","url":"{{ request.url_root }}","applicationCategory":"UtilitiesApplication","operatingSystem":"Android, iOS, Windows","description":"Download public Instagram media as MP4 or MP3."}</script>
   <link rel="manifest" href="{{ url_for('manifest') }}">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>NEXORA DOWNLOADER</title>
@@ -31,7 +32,7 @@
   <header class="site-header">
     <a class="brand" href="#home" aria-label="NEXORA home"><img class="brand-logo" src="{{ url_for('static', filename='nexora-logo.png') }}" alt="NEXORA DOWNLOADER logo"><span>NEXORA <b>DOWNLOADER</b></span></a>
     <nav class="nav-links" aria-label="Primary navigation"><a href="#home" data-i18n="home">Home</a><a href="#how-it-works" data-i18n="how">How it works</a><a href="#community" data-i18n="reviews">Reviews</a><a href="#features" data-i18n="features">Features</a><a href="#faq">FAQ</a></nav>
-    <div class="header-tools"><button id="language-button" class="language-button" type="button" aria-label="Switch language">മലയാളം / EN</button><a class="header-cta" href="#downloader">Start downloading <span>↓</span></a></div>
+    <div class="header-tools"><button id="theme-button" class="language-button" type="button" aria-label="Toggle theme">◐</button><button id="language-button" class="language-button" type="button" aria-label="Switch language">മലയാളം / EN</button><a class="header-cta" href="#downloader">Start downloading <span>↓</span></a></div>
   </header>
 
   <main>
@@ -52,7 +53,7 @@
       <div class="card-heading"><div><h2 data-i18n="pasteTitle">Paste your Instagram link</h2><p data-i18n="pasteSub">We’ll fetch publicly available media for you.</p></div><div class="card-icon">↘</div></div>
         <form id="download-form" novalidate>
           <label class="sr-only" for="reel-url">Instagram Reel URL</label>
-          <div class="input-wrap"><span class="input-prefix">instagram.com/</span><input id="reel-url" name="url" type="url" autocomplete="url" inputmode="url" placeholder="Paste Instagram link here..." required><button id="paste-button" class="paste-button" type="button">Paste</button></div>
+          <div id="drop-zone" class="input-wrap"><span class="input-prefix">instagram.com/</span><input id="reel-url" name="url" type="url" autocomplete="url" inputmode="url" placeholder="Paste Instagram link here..." required><button id="paste-button" class="paste-button" type="button">Paste</button></div><div class="drop-hint">Drag a link here or paste from Instagram</div><button id="queue-button" class="preview-button" type="button">Add to queue <span>＋</span></button>
           <button id="preview-button" class="preview-button" type="button">Preview link <span>✦</span></button>
           <div id="preview-card" class="preview-card" hidden><img id="preview-image" alt="Media thumbnail"><div><strong id="preview-title">Public Instagram media</strong><small id="preview-creator">Instagram</small></div></div>
           <div class="quality-row"><label for="video-quality">Video <select id="video-quality"><option value="best">Best available</option><option value="1080">Up to 1080p</option><option value="720">Up to 720p</option><option value="480">Up to 480p</option></select></label><label for="audio-quality">Audio <select id="audio-quality"><option value="192">MP3 192 kbps</option><option value="128">MP3 128 kbps</option><option value="320">MP3 320 kbps</option></select></label></div>
@@ -60,14 +61,14 @@
           <div id="wake-status" class="wake-status" aria-live="polite"></div>
           <div id="progress-steps" class="progress-steps" hidden><span class="active">1. Connecting</span><span>2. Fetching</span><span>3. Preparing files</span></div>
         </form>
-        <div id="status" class="status" role="alert" aria-live="polite"></div>
+        <div id="status" class="status" role="alert" aria-live="polite"></div><div id="queue-panel" class="queue-panel" hidden><div><strong>Download queue</strong><small id="queue-count">0 links</small></div><ol id="queue-list"></ol><button id="process-queue" class="primary-button" type="button">Process queue <span>→</span></button></div>
         <div id="result" class="result-card" hidden>
           <div class="result-top"><div class="success-icon">✓</div><div><h3>Your media is ready</h3><p>Choose a format below. Links expire automatically.</p></div></div>
           <div class="download-options"><a id="video-link" class="format-button" download><span>🎬</span><span><b>Download MP4</b><small>Video file</small></span><strong>↓</strong></a><a id="audio-link" class="format-button" download><span>🎵</span><span><b>Download MP3</b><small>Audio file</small></span><strong>↓</strong></a></div>
           <div class="share-options"><span>Share NEXORA</span><button id="copy-link-button" type="button">Copy site link</button><a href="https://wa.me/?text=Download%20public%20Instagram%20media%20with%20NEXORA%20https%3A%2F%2Fzee-reel-downloader.onrender.com" target="_blank" rel="noopener noreferrer">Share to WhatsApp</a></div>
           <button id="again-button" class="again-button" type="button">↻ &nbsp; Download again</button>
         </div>
-        <p class="legal-note">By using NEXORA, you confirm you have permission to download this content. <a href="{{ url_for('privacy') }}">Privacy</a> · <a href="#faq">Learn more</a></p>
+        <div id="install-banner" class="install-banner" hidden><span>Install NEXORA as an app</span><button id="install-button" type="button">Install</button><button id="dismiss-install" type="button">×</button></div><p class="legal-note">By using NEXORA, you confirm you have permission to download this content. <a href="{{ url_for('privacy') }}">Privacy</a> · <a href="#faq">Learn more</a></p>
       </div>
     </section>
 
@@ -107,6 +108,7 @@
 
     <section class="faq-section content-section" id="faq"><div class="section-label">05 / FAQ</div><div class="section-intro"><h2>Good to<br><em>know.</em></h2></div><div class="faq-list"><details open><summary>What links can I download?<span>+</span></summary><p>NEXORA supports publicly accessible Instagram Reels, posts, IGTV links, and public story URLs when Instagram makes the media available without login. Private, login-required, and restricted content is not supported.</p></details><details><summary>Is my Instagram account needed?<span>+</span></summary><p>No. NEXORA never asks for your Instagram password or account credentials.</p></details><details><summary>Why did processing fail?<span>+</span></summary><p>Instagram can change its delivery systems, or a post or story may be unavailable, private, expired, or restricted. Please verify the link and try again.</p></details><details><summary>Can I download any content?<span>+</span></summary><p>Only download content you created or have permission to save. Respect copyright, privacy, and Instagram’s terms of use.</p></details></div></section>
   </main>
+<div id="result-modal" class="result-modal" hidden><div class="result-modal-card"><button id="close-modal" class="modal-close" type="button">×</button><div id="modal-preview" class="modal-preview">✓</div><h2>Ready to download</h2><p>Your files are prepared. Choose your format below.</p><div class="modal-actions"><a id="modal-video-link" class="format-button" download>Download MP4 ↓</a><a id="modal-audio-link" class="format-button" download>Download MP3 ↓</a></div></div></div>
   <footer><a class="brand" href="#home"><img class="brand-logo" src="{{ url_for('static', filename='nexora-logo.png') }}" alt="NEXORA DOWNLOADER logo"><span>NEXORA <b>DOWNLOADER</b></span></a><p>Fast downloads. Smooth experience.</p><div class="footer-links"><a href="https://www.instagram.com/risham004/" target="_blank" rel="noopener noreferrer">Instagram @risham004</a><a href="{{ url_for('privacy') }}">Privacy</a><a href="{{ url_for('admin_login') }}">Admin</a><span>Created by <strong>RISHAM004</strong> · © 2026 NEXORA DOWNLOADER</span></div></footer>
   <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

@@ -21,3 +21,7 @@ services:
         value: "157286400"
       - key: LOG_LEVEL
         value: INFO
+      - key: PUBLIC_BASE_URL
+        value: https://zee-reel-downloader.onrender.com
+      - key: MAINTENANCE_MODE
+        value: "false"

@@ -69,3 +69,15 @@ Render Cron Jobs require a paid plan. For a no-cost alternative, `.github/workfl
 The site now includes an installable PWA shell, link preview endpoint, staged download progress, Malayalam/English toggle, WhatsApp sharing, privacy page, and clearer public-media guidance. The preview endpoint never downloads media; it only asks yt-dlp for publicly available metadata.
 
 The admin area is available at `/admin/login`. The configured Render environment variables are `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SECRET_KEY`; credentials are intentionally not stored in Git. Change them from Render Environment Variables before sharing access. The dashboard is protected by a signed session and does not expose Firebase credentials or private media.
+
+## Advanced updates
+
+- Multi-link queue with drag-and-drop/paste workflow.
+- PWA install prompt and service-worker shell caching.
+- Persistent dark/light theme switcher.
+- Download result modal with direct MP4/MP3 actions.
+- JSON-LD WebApplication schema and `PUBLIC_BASE_URL` support for custom domains.
+- Protected admin operational metrics at `/admin`.
+- Admin maintenance-mode toggle; it applies to the current service process. For persistent maintenance across redeploys, set Render's `MAINTENANCE_MODE=true` environment variable.
+
+When `zeereeldownloader.eu.org` is approved, point its DNS to Render and set `PUBLIC_BASE_URL=https://zeereeldownloader.eu.org` in Render Environment Variables, then redeploy. The current `onrender.com` URL remains valid.

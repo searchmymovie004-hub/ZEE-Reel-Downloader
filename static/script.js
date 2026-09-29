@@ -47,10 +47,33 @@ const reviewCount = document.querySelector('#review-count');
 const reviewForm = document.querySelector('#review-form');
 const reviewMessage = document.querySelector('#review-message');
 const reviewStatus = document.querySelector('#review-status');
+const queueButton = document.querySelector('#queue-button');
+const queuePanel = document.querySelector('#queue-panel');
+const queueList = document.querySelector('#queue-list');
+const queueCount = document.querySelector('#queue-count');
+const processQueue = document.querySelector('#process-queue');
+const dropZone = document.querySelector('#drop-zone');
+const themeButton = document.querySelector('#theme-button');
+const installBanner = document.querySelector('#install-banner');
+const installButton = document.querySelector('#install-button');
+const dismissInstall = document.querySelector('#dismiss-install');
+const resultModal = document.querySelector('#result-modal');
+const closeModal = document.querySelector('#close-modal');
+const modalVideoLink = document.querySelector('#modal-video-link');
+const modalAudioLink = document.querySelector('#modal-audio-link');
+let deferredInstallPrompt;
+const downloadQueue = [];
 
 function showError(message) {
   status.textContent = message;
   result.hidden = true;
+}
+
+function renderQueue() {
+  queueList.textContent = '';
+  downloadQueue.forEach((url, index) => { const item = document.createElement('li'); item.textContent = url; const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = '×'; remove.onclick = () => { downloadQueue.splice(index, 1); renderQueue(); }; item.appendChild(remove); queueList.appendChild(item); });
+  queueCount.textContent = `${downloadQueue.length} link${downloadQueue.length === 1 ? '' : 's'}`;
+  queuePanel.hidden = downloadQueue.length === 0;
 }
 
 function setLoading(isLoading) {
@@ -162,7 +185,7 @@ form.addEventListener('submit', async event => {
     const response = await requestDownload(url, {url, video_quality: videoQuality.value, audio_quality: audioQuality.value});
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.success) throw new Error(data.error || 'Unable to process this media.');
-    videoLink.href = data.video_url; audioLink.href = data.audio_url; result.hidden = false;
+    videoLink.href = data.video_url; audioLink.href = data.audio_url; result.hidden = false; modalVideoLink.href = data.video_url; modalAudioLink.href = data.audio_url; resultModal.hidden = false;
     saveHistory(url, data.video_url, data.audio_url);
     recordSuccessfulDownload().catch(() => console.info('Download count could not be updated.'));
   } catch (error) { showError(error.message || 'The media could not be processed right now. Please try again.'); }
@@ -190,3 +213,19 @@ reviewForm.addEventListener('submit', async event => {
 });
 
 againButton.addEventListener('click', () => { result.hidden = true; input.value = ''; status.textContent = ''; input.focus(); });
+
+
+queueButton.addEventListener('click', () => { const url = input.value.trim(); if (!url) { showError('Paste a link before adding it to the queue.'); return; } if (!downloadQueue.includes(url)) downloadQueue.push(url); input.value = ''; renderQueue(); });
+processQueue.addEventListener('click', async () => { const items = [...downloadQueue]; downloadQueue.length = 0; renderQueue(); for (const url of items) { input.value = url; form.dispatchEvent(new Event('submit', {cancelable:true})); await new Promise(resolve => { const timer = setInterval(() => { if (!downloadButton.disabled) { clearInterval(timer); resolve(); } }, 300); }); } });
+dropZone.addEventListener('dragover', event => { event.preventDefault(); dropZone.classList.add('drag-active'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-active'));
+dropZone.addEventListener('drop', event => { event.preventDefault(); dropZone.classList.remove('drag-active'); const text = event.dataTransfer.getData('text/plain'); if (text) { input.value = text.trim(); previewButton.focus(); } });
+window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); deferredInstallPrompt = event; installBanner.hidden = false; });
+installButton.addEventListener('click', async () => { if (!deferredInstallPrompt) return; deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice; deferredInstallPrompt = null; installBanner.hidden = true; });
+dismissInstall.addEventListener('click', () => { installBanner.hidden = true; localStorage.setItem('nexora-install-dismissed', '1'); });
+closeModal.addEventListener('click', () => { resultModal.hidden = true; });
+resultModal.addEventListener('click', event => { if (event.target === resultModal) resultModal.hidden = true; });
+function applyTheme(theme) { document.body.classList.toggle('light-theme', theme === 'light'); localStorage.setItem('nexora-theme', theme); themeButton.textContent = theme === 'light' ? '☀' : '◐'; }
+themeButton.addEventListener('click', () => applyTheme(document.body.classList.contains('light-theme') ? 'dark' : 'light'));
+applyTheme(localStorage.getItem('nexora-theme') || 'dark');
+if (localStorage.getItem('nexora-install-dismissed') === '1') installBanner.hidden = true;
