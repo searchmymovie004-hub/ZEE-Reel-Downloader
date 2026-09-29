@@ -10,7 +10,7 @@ from collections import defaultdict, deque
 from pathlib import Path
 from urllib.parse import urlparse
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, Response, jsonify, render_template, request, send_from_directory
 from werkzeug.exceptions import RequestEntityTooLarge
 
 import yt_dlp
@@ -40,7 +40,7 @@ _rate_lock = threading.Lock()
 _rate_buckets = defaultdict(deque)
 
 INSTAGRAM_HOSTS = {"instagram.com", "www.instagram.com"}
-REEL_PATH = re.compile(r"^/reel/[A-Za-z0-9_-]+/?$")
+INSTAGRAM_MEDIA_PATH = re.compile(r"^(?:/(?:reel|p|tv)/[A-Za-z0-9_-]+/?|/stories/[A-Za-z0-9_.-]+/(?:[0-9]+|highlights/[0-9]+)/?)$")
 
 
 def client_key() -> str:
@@ -88,7 +88,7 @@ def is_public_reel_url(value: object) -> bool:
     if parsed.fragment:
         # Fragments are client-side only and are not needed for extraction.
         return False
-    return bool(REEL_PATH.fullmatch(parsed.path))
+    return bool(INSTAGRAM_MEDIA_PATH.fullmatch(parsed.path))
 
 
 def ffmpeg_path() -> str | None:
@@ -116,15 +116,24 @@ def find_output(directory: Path, suffix: str) -> Path | None:
     return max(matches, key=lambda p: p.stat().st_mtime) if matches else None
 
 
-def process_reel(url: str, token: str) -> tuple[Path, Path]:
+def process_reel(url: str, token: str, video_quality: str = "best", audio_quality: str = "192") -> tuple[Path, Path]:
     work_dir = DOWNLOAD_DIR / token
     work_dir.mkdir(mode=0o700)
     ffmpeg = ffmpeg_path()
     if not ffmpeg:
         raise RuntimeError("Media conversion is unavailable on this server.")
 
+    video_formats = {
+        "best": "bestvideo+bestaudio/best",
+        "1080": "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
+        "720": "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+        "480": "bestvideo[height<=480]+bestaudio/best[height<=480]/best",
+    }
+    audio_formats = {"128": "128", "192": "192", "320": "320"}
+    video_quality = video_quality if video_quality in video_formats else "best"
+    audio_quality = audio_quality if audio_quality in audio_formats else "192"
     options = {
-        "format": "bestvideo+bestaudio/best",
+        "format": video_formats[video_quality],
         "outtmpl": str(work_dir / "video.%(ext)s"),
         "noplaylist": True,
         "quiet": True,
@@ -161,7 +170,7 @@ def process_reel(url: str, token: str) -> tuple[Path, Path]:
         "socket_timeout": 25,
         "retries": 1,
         "max_filesize": MAX_DOWNLOAD_BYTES,
-        "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"}],
+        "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": audio_formats[audio_quality]}],
         "ffmpeg_location": ffmpeg,
     }
     with yt_dlp.YoutubeDL(audio_options) as downloader:
@@ -183,6 +192,22 @@ def index():
     return render_template("index.html")
 
 
+@app.get("/robots.txt")
+def robots():
+    return Response("User-agent: *\nAllow: /\nSitemap: https://zee-reel-downloader.onrender.com/sitemap.xml\n", mimetype="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    return Response(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
+        "<url><loc>https://zee-reel-downloader.onrender.com/</loc></url>"
+        "</urlset>",
+        mimetype="application/xml",
+    )
+
+
 @app.post("/api/download")
 def api_download():
     cleanup_expired()
@@ -190,12 +215,14 @@ def api_download():
         return jsonify(success=False, error="Rate limit reached. Please try again in a few minutes."), 429
     payload = request.get_json(silent=True) or {}
     url = str(payload.get("url", "")).strip()
+    video_quality = str(payload.get("video_quality", "best"))
+    audio_quality = str(payload.get("audio_quality", "192"))
     if not is_public_reel_url(url):
-        return jsonify(success=False, error="Enter a valid public Instagram Reel URL."), 400
+        return jsonify(success=False, error="Enter a valid public Instagram Reel, post, IGTV, or story URL."), 400
 
     token = uuid.uuid4().hex
     try:
-        process_reel(url, token)
+        process_reel(url, token, video_quality, audio_quality)
     except yt_dlp.utils.DownloadError as exc:
         shutil.rmtree(DOWNLOAD_DIR / token, ignore_errors=True)
         message = str(exc).lower()
