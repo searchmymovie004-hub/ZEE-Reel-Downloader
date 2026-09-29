@@ -29,6 +29,7 @@ const previewCard = document.querySelector('#preview-card');
 const previewImage = document.querySelector('#preview-image');
 const previewTitle = document.querySelector('#preview-title');
 const previewCreator = document.querySelector('#preview-creator');
+const previewMeta = document.querySelector('#preview-meta');
 const videoQuality = document.querySelector('#video-quality');
 const audioQuality = document.querySelector('#audio-quality');
 const status = document.querySelector('#status');
@@ -38,6 +39,7 @@ const videoLink = document.querySelector('#video-link');
 const audioLink = document.querySelector('#audio-link');
 const againButton = document.querySelector('#again-button');
 const copyLinkButton = document.querySelector('#copy-link-button');
+const shareResultButton = document.querySelector('#share-result-button');
 const historySection = document.querySelector('#history');
 const historyList = document.querySelector('#history-list');
 const clearHistoryButton = document.querySelector('#clear-history');
@@ -148,12 +150,15 @@ previewButton.addEventListener('click', async () => {
     if (!response.ok || !data.success) throw new Error(data.error || 'Preview unavailable.');
     previewTitle.textContent = data.title || 'Public Instagram media';
     previewCreator.textContent = data.creator || 'Instagram';
+    const details = [data.duration ? `${Math.round(data.duration)}s` : '', data.width && data.height ? `${data.width}×${data.height}` : '', data.filesize ? `${(data.filesize / 1048576).toFixed(1)} MB` : ''].filter(Boolean);
+    previewMeta.textContent = details.join(' · ');
     if (data.thumbnail) { previewImage.src = data.thumbnail; previewImage.hidden = false; } else previewImage.hidden = true;
     previewCard.hidden = false;
     status.textContent = data.preview_available === false ? 'Thumbnail details are unavailable, but this public link can still be downloaded.' : '';
   } catch (error) {
     previewTitle.textContent = 'Public Instagram media';
     previewCreator.textContent = 'Ready to try downloading';
+    previewMeta.textContent = 'Metadata unavailable';
     previewImage.hidden = true;
     previewCard.hidden = false;
     status.textContent = error.message || 'Preview details unavailable. You can still download this link.';
@@ -165,14 +170,13 @@ previewButton.addEventListener('click', async () => {
 
 async function requestDownload(url, payload) {
   let response;
-  try {
-    response = await fetch('/api/download', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
-  } catch (error) {
-    setWakeMessage('The server is waking up. Retrying once…');
-    await new Promise(resolve => setTimeout(resolve, 1600));
-    response = await fetch('/api/download', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try { response = await fetch('/api/download', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}); }
+    catch (error) { response = null; }
+    if (response && response.ok) return response;
+    if (attempt < 2) { setWakeMessage(`Temporary issue. Retrying in ${attempt + 2}s…`); await new Promise(resolve => setTimeout(resolve, (attempt + 2) * 1000)); }
   }
-  return response;
+  return response || new Response(JSON.stringify({error: 'The server is unavailable. Please try again.'}), {status: 503});
 }
 
 form.addEventListener('submit', async event => {
@@ -212,7 +216,14 @@ reviewForm.addEventListener('submit', async event => {
   finally { submitButton.disabled = false; }
 });
 
-againButton.addEventListener('click', () => { result.hidden = true; input.value = ''; status.textContent = ''; input.focus(); });
+againButton.addEventListener('click', () => { result.hidden = true; resultModal.hidden = true; input.value = ''; status.textContent = ''; input.focus(); });
+shareResultButton.addEventListener('click', async () => { const share = {title: 'NEXORA DOWNLOADER', text: 'Download public Instagram media with NEXORA', url: window.location.href}; try { if (navigator.share) await navigator.share(share); else { await navigator.clipboard.writeText(window.location.href); shareResultButton.textContent = 'Link copied!'; setTimeout(() => shareResultButton.textContent = 'Share result', 1600); } } catch { shareResultButton.textContent = 'Share cancelled'; } });
+const languageButton = document.querySelector('#language-button');
+const translations = { en: {pasteTitle: 'Paste your Instagram link', pasteSub: 'We’ll fetch publicly available media for you.'}, ml: {pasteTitle: 'നിങ്ങളുടെ Instagram ലിങ്ക് പേസ്റ്റ് ചെയ്യുക', pasteSub: 'പബ്ലിക് മീഡിയ ഞങ്ങൾ കണ്ടെത്തും.'}, hi: {pasteTitle: 'अपना Instagram लिंक पेस्ट करें', pasteSub: 'हम सार्वजनिक मीडिया प्राप्त करेंगे।'} };
+let language = localStorage.getItem('nexora-language') || 'en';
+function applyLanguage(next) { language = next; localStorage.setItem('nexora-language', next); document.querySelectorAll('[data-i18n]').forEach(node => { const key = node.dataset.i18n; if (translations[next][key]) node.textContent = translations[next][key]; }); languageButton.textContent = next === 'en' ? 'മലയാളം / हिन्दी' : 'English / हिन्दी'; }
+languageButton.addEventListener('click', () => applyLanguage(language === 'en' ? 'ml' : language === 'ml' ? 'hi' : 'en')); applyLanguage(language);
+
 
 
 queueButton.addEventListener('click', () => { const url = input.value.trim(); if (!url) { showError('Paste a link before adding it to the queue.'); return; } if (!downloadQueue.includes(url)) downloadQueue.push(url); input.value = ''; renderQueue(); });

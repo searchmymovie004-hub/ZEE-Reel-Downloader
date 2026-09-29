@@ -25,3 +25,5 @@ services:
         value: https://zee-reel-downloader.onrender.com
       - key: MAINTENANCE_MODE
         value: "false"
+      - key: SITE_ANNOUNCEMENT
+        value: ""

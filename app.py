@@ -31,6 +31,7 @@ MAX_DOWNLOAD_BYTES = int(os.environ.get("MAX_DOWNLOAD_BYTES", str(150 * 1024 * 1
 RATE_LIMIT_COUNT = int(os.environ.get("RATE_LIMIT_COUNT", "5"))
 RATE_LIMIT_WINDOW = int(os.environ.get("RATE_LIMIT_WINDOW", "600"))
 PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "https://zee-reel-downloader.onrender.com").rstrip("/")
+ANNOUNCEMENT = os.environ.get("SITE_ANNOUNCEMENT", "")
 METRICS = {"downloads": 0, "preview_requests": 0, "preview_fallbacks": 0, "errors": 0, "started_at": time.time()}
 MAINTENANCE_OVERRIDE = False
 
@@ -217,7 +218,7 @@ def index():
     cleanup_expired()
     if maintenance_active():
         return render_template("maintenance.html"), 503
-    return render_template("index.html")
+    return render_template("index.html", announcement=ANNOUNCEMENT)
 
 
 @app.get("/robots.txt")
@@ -275,13 +276,14 @@ def admin_logout():
 
 @app.get("/api/health")
 def health():
-    return jsonify(status="ok", maintenance=maintenance_active(), metrics={k: v for k, v in METRICS.items() if k != "started_at"})
+    return jsonify(status="ok", maintenance=maintenance_active(), announcement=bool(ANNOUNCEMENT), metrics={k: v for k, v in METRICS.items() if k != "started_at"})
 
 
 @app.get("/admin")
 @admin_required
 def admin_dashboard():
     stats = dict(METRICS)
+    stats["announcement"] = ANNOUNCEMENT
     stats["uptime_minutes"] = int((time.time() - METRICS["started_at"]) / 60)
     stats["maintenance"] = maintenance_active()
     return render_template("admin.html", stats=stats)
@@ -308,11 +310,11 @@ def api_preview():
         with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True, "skip_download": True, "socket_timeout": 15, "noplaylist": True}) as downloader:
             info = downloader.extract_info(url, download=False)
         info = info or {}
-        return jsonify(success=True, title=info.get("title") or "Public Instagram media", creator=info.get("uploader") or "Instagram", thumbnail=info.get("thumbnail"))
+        return jsonify(success=True, title=info.get("title") or "Public Instagram media", creator=info.get("uploader") or "Instagram", thumbnail=info.get("thumbnail"), duration=info.get("duration"), width=info.get("width"), height=info.get("height"), filesize=info.get("filesize") or info.get("filesize_approx"))
     except Exception:
         METRICS["preview_fallbacks"] += 1
         # Instagram often blocks metadata requests while still allowing a public download attempt.
-        return jsonify(success=True, preview_available=False, title="Public Instagram media", creator="Instagram", thumbnail=None)
+        return jsonify(success=True, preview_available=False, title="Public Instagram media", creator="Instagram", thumbnail=None, duration=None, width=None, height=None, filesize=None)
 
 
 @app.post("/api/download")

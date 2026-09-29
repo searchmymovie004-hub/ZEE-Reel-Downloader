@@ -81,3 +81,9 @@ The admin area is available at `/admin/login`. The configured Render environment
 - Admin maintenance-mode toggle; it applies to the current service process. For persistent maintenance across redeploys, set Render's `MAINTENANCE_MODE=true` environment variable.
 
 When `zeereeldownloader.eu.org` is approved, point its DNS to Render and set `PUBLIC_BASE_URL=https://zeereeldownloader.eu.org` in Render Environment Variables, then redeploy. The current `onrender.com` URL remains valid.
+
+## Additional product updates
+
+The latest pass adds a mobile bottom navigation, Malayalam/Hindi/English switching for the downloader labels, richer browser history, native share support, preview metadata such as duration/resolution/file size when Instagram exposes it, and an automatic three-attempt retry flow for transient server failures. The admin view now shows operational metric bars and the configured announcement. Set `SITE_ANNOUNCEMENT` in Render to show a dismissible banner on the homepage.
+
+Cloud object storage and a separate background worker are not enabled automatically because they require a storage/queue provider and credentials. The current service continues to use secure temporary local files and automatic cleanup.
