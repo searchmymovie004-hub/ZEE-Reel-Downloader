@@ -53,7 +53,7 @@ INSTAGRAM_HOSTS = {"instagram.com", "www.instagram.com"}
 INSTAGRAM_MEDIA_PATH = re.compile(
     r"^(?:"
     r"/(?:reel|p|tv)/[A-Za-z0-9_-]+/?"
-    r"|/share/(?:reel|p)/[A-Za-z0-9_-]+/?"
+    r"|/share/(?:reel|p|story)/[A-Za-z0-9_-]+/?"
     r"|/stories/(?:[A-Za-z0-9_.-]+/(?:[0-9]+|highlights/[0-9]+)|highlights/[0-9]+)/?"
     r")$"
 )
