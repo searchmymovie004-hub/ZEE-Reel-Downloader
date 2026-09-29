@@ -1,4 +1,4 @@
-# ZEE Reel Downloader
+# NEXORA DOWNLOADER
 
 A mobile-first Flask web application for processing **publicly accessible Instagram Reel URLs** into temporary MP4 video and MP3 audio downloads.
 
@@ -56,7 +56,7 @@ Render Cron Jobs require a paid plan. For a no-cost alternative, `.github/workfl
 
 ## Current website enhancements
 
-- Supplied ZEE Reel Downloader artwork is used as both the favicon and visible header/footer logo.
+- Supplied NEXORA DOWNLOADER artwork is used as both the favicon and visible header/footer logo.
 - Public Instagram Reel, post, IGTV, and story URL validation is supported; access-restricted content remains blocked.
 - Browser-only recent download history, with a clear-history control.
 - Render Free-plan wake-up messaging with one safe network retry.

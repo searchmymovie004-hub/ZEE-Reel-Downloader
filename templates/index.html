@@ -4,20 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080b16">
-  <meta name="description" content="ZEE Reel Downloader — download public Instagram Reels, posts, and IGTV media as MP4 video or MP3 audio.">
-  <meta name="keywords" content="Instagram Reel downloader, Instagram video download, MP4, MP3, ZEE Reel Downloader">
+  <meta name="description" content="NEXORA DOWNLOADER — download public Instagram Reels, posts, stories, and IGTV media as MP4 video or MP3 audio.">
+  <meta name="keywords" content="Instagram Reel downloader, Instagram video download, MP4, MP3, NEXORA DOWNLOADER">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="ZEE Reel Downloader">
-  <meta property="og:description" content="Download public Instagram media as MP4 video or MP3 audio.">
-  <meta property="og:image" content="{{ url_for('static', filename='logo.png', _external=True) }}">
+  <meta property="og:title" content="NEXORA DOWNLOADER">
+  <meta property="og:description" content="Download public Instagram media with NEXORA as MP4 video or MP3 audio.">
+  <meta property="og:image" content="{{ url_for('static', filename='nexora-logo.png', _external=True) }}">
   <meta property="og:url" content="{{ request.url_root }}">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ZEE Reel Downloader">
-  <meta name="twitter:description" content="Fast, simple downloads for public Instagram media.">
-  <meta name="twitter:image" content="{{ url_for('static', filename='logo.png', _external=True) }}">
+  <meta name="twitter:title" content="NEXORA DOWNLOADER">
+  <meta name="twitter:description" content="Fast, smooth downloads for public Instagram media with NEXORA.">
+  <meta name="twitter:image" content="{{ url_for('static', filename='nexora-logo.png', _external=True) }}">
   <meta name="google-site-verification" content="9r8XW3g8YytoRn7-m923CnxOIgA16n06yfOTkubQ7w4">
   <link rel="canonical" href="{{ request.url_root }}">
-  <title>ZEE Reel Downloader</title>
+  <title>NEXORA DOWNLOADER</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,20 +27,18 @@
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <header class="site-header">
-    <a class="brand" href="#home" aria-label="ZEE home"><img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="ZEE Reel Downloader logo"><span>ZEE <b>BOTS</b></span></a>
+    <a class="brand" href="#home" aria-label="NEXORA home"><img class="brand-logo" src="{{ url_for('static', filename='nexora-logo.png') }}" alt="NEXORA DOWNLOADER logo"><span>NEXORA <b>DOWNLOADER</b></span></a>
     <nav class="nav-links" aria-label="Primary navigation"><a href="#home">Home</a><a href="#how-it-works">How it works</a><a href="#community">Reviews</a><a href="#features">Features</a><a href="#faq">FAQ</a></nav>
-    <a class="header-cta" href="https://t.me/Instareelwithmp3convert_v3_bot" target="_blank" rel="noopener noreferrer">Open Telegram bot <span>↗</span></a>
+    <a class="header-cta" href="#downloader">Start downloading <span>↓</span></a>
   </header>
 
   <main>
     <section class="hero" id="home">
       <div class="eyebrow"><span class="pulse-dot"></span> Fast. Private. Effortless.</div>
       <h1>Keep the moments<br><em>that matter.</em></h1>
-      <p class="hero-copy">Download public Instagram Reels, posts, and IGTV media in seconds. Save crisp MP4 video or extract the audio as MP3.</p>
+      <p class="hero-copy">Download public Instagram Reels, posts, stories, and IGTV media in seconds. Save crisp MP4 video or extract the audio as MP3.</p>
       <a href="#downloader" class="primary-button hero-button">Start downloading <span>↓</span></a>
-      <div class="telegram-actions" aria-label="Telegram links">
-        <a class="telegram-button" href="https://t.me/Instareelwithmp3convert_v3_bot" target="_blank" rel="noopener noreferrer"><span class="telegram-symbol">✈</span><span><b>Use Telegram Bot</b><small>Fast downloads on Telegram</small></span><strong>↗</strong></a>
-        <a class="channel-button" href="https://t.me/zeereeldownloader" target="_blank" rel="noopener noreferrer"><span class="channel-symbol">◈</span><span><b>Join Update Channel</b><small>News, updates & announcements</small></span><strong>↗</strong></a>
+      <div class="creator-actions" aria-label="Creator links">
         <a class="instagram-button" href="https://www.instagram.com/risham004/" target="_blank" rel="noopener noreferrer"><span class="instagram-symbol">◎</span><span><b>Follow RISHAM004</b><small>Connect on Instagram</small></span><strong>↗</strong></a>
       </div>
       <div class="hero-note"><span>🔒</span> Public Reels, posts & stories only &nbsp;·&nbsp; No account required</div>
@@ -61,10 +59,10 @@
         <div id="result" class="result-card" hidden>
           <div class="result-top"><div class="success-icon">✓</div><div><h3>Your media is ready</h3><p>Choose a format below. Links expire automatically.</p></div></div>
           <div class="download-options"><a id="video-link" class="format-button" download><span>🎬</span><span><b>Download MP4</b><small>Video file</small></span><strong>↓</strong></a><a id="audio-link" class="format-button" download><span>🎵</span><span><b>Download MP3</b><small>Audio file</small></span><strong>↓</strong></a></div>
-          <div class="share-options"><span>Share ZEE</span><button id="copy-link-button" type="button">Copy site link</button><a href="https://t.me/share/url?url=https%3A%2F%2Fzee-reel-downloader.onrender.com&text=Download%20public%20Instagram%20media%20with%20ZEE" target="_blank" rel="noopener noreferrer">Share to Telegram</a><a href="https://wa.me/?text=Download%20public%20Instagram%20media%20with%20ZEE%20https%3A%2F%2Fzee-reel-downloader.onrender.com" target="_blank" rel="noopener noreferrer">Share to WhatsApp</a></div>
+          <div class="share-options"><span>Share NEXORA</span><button id="copy-link-button" type="button">Copy site link</button><a href="https://wa.me/?text=Download%20public%20Instagram%20media%20with%20NEXORA%20https%3A%2F%2Fzee-reel-downloader.onrender.com" target="_blank" rel="noopener noreferrer">Share to WhatsApp</a></div>
           <button id="again-button" class="again-button" type="button">↻ &nbsp; Download again</button>
         </div>
-        <p class="legal-note">By using ZEE, you confirm you have permission to download this content. <a href="#faq">Learn more</a></p>
+        <p class="legal-note">By using NEXORA, you confirm you have permission to download this content. <a href="#faq">Learn more</a></p>
       </div>
     </section>
 
@@ -100,11 +98,11 @@
 
     <section class="how-section content-section" id="how-it-works"><div class="section-label">03 / How it works</div><div class="section-intro"><h2>Three simple steps.<br><em>Zero friction.</em></h2><p>Designed to get you from link to saved moment without the clutter.</p></div><div class="steps"><article><span>01</span><div class="step-icon">⌁</div><h3>Copy the link</h3><p>Copy a public Reel, post, IGTV, or story link from Instagram.</p></article><article><span>02</span><div class="step-icon">⌘</div><h3>Paste it here</h3><p>Drop the link into the downloader above. No sign-in or account is needed.</p></article><article><span>03</span><div class="step-icon">↓</div><h3>Save your format</h3><p>Choose MP4 for video or MP3 for audio and start enjoying it offline.</p></article></div></section>
 
-    <section class="features-section content-section" id="features"><div class="section-label">04 / Why ZEE</div><div class="section-intro"><h2>Small tool.<br><em>Big utility.</em></h2></div><div class="feature-grid"><div><span>✦</span><h3>Fast processing</h3><p>Quick, focused processing with clear progress feedback.</p></div><div><span>◉</span><h3>Made for mobile</h3><p>A touch-friendly experience for phones, tablets, and desktop.</p></div><div><span>◌</span><h3>Secure by design</h3><p>Temporary files are automatically removed after a short period.</p></div><div><span>↗</span><h3>Two formats</h3><p>Keep the complete Reel or take only the sound with MP3.</p></div></div></section>
+    <section class="features-section content-section" id="features"><div class="section-label">04 / Why NEXORA</div><div class="section-intro"><h2>Small tool.<br><em>Big utility.</em></h2></div><div class="feature-grid"><div><span>✦</span><h3>Fast processing</h3><p>Quick, focused processing with clear progress feedback.</p></div><div><span>◉</span><h3>Made for mobile</h3><p>A touch-friendly experience for phones, tablets, and desktop.</p></div><div><span>◌</span><h3>Secure by design</h3><p>Temporary files are automatically removed after a short period.</p></div><div><span>↗</span><h3>Two formats</h3><p>Keep the complete Reel or take only the sound with MP3.</p></div></div></section>
 
-    <section class="faq-section content-section" id="faq"><div class="section-label">05 / FAQ</div><div class="section-intro"><h2>Good to<br><em>know.</em></h2></div><div class="faq-list"><details open><summary>What links can I download?<span>+</span></summary><p>ZEE supports publicly accessible Instagram Reels, posts, IGTV links, and public story URLs when Instagram makes the media available without login. Private, login-required, and restricted content is not supported.</p></details><details><summary>Is my Instagram account needed?<span>+</span></summary><p>No. ZEE never asks for your Instagram password or account credentials.</p></details><details><summary>Why did processing fail?<span>+</span></summary><p>Instagram can change its delivery systems, or a post or story may be unavailable, private, expired, or restricted. Please verify the link and try again.</p></details><details><summary>Can I download any content?<span>+</span></summary><p>Only download content you created or have permission to save. Respect copyright, privacy, and Instagram’s terms of use.</p></details></div></section>
+    <section class="faq-section content-section" id="faq"><div class="section-label">05 / FAQ</div><div class="section-intro"><h2>Good to<br><em>know.</em></h2></div><div class="faq-list"><details open><summary>What links can I download?<span>+</span></summary><p>NEXORA supports publicly accessible Instagram Reels, posts, IGTV links, and public story URLs when Instagram makes the media available without login. Private, login-required, and restricted content is not supported.</p></details><details><summary>Is my Instagram account needed?<span>+</span></summary><p>No. NEXORA never asks for your Instagram password or account credentials.</p></details><details><summary>Why did processing fail?<span>+</span></summary><p>Instagram can change its delivery systems, or a post or story may be unavailable, private, expired, or restricted. Please verify the link and try again.</p></details><details><summary>Can I download any content?<span>+</span></summary><p>Only download content you created or have permission to save. Respect copyright, privacy, and Instagram’s terms of use.</p></details></div></section>
   </main>
-  <footer><a class="brand" href="#home"><img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="ZEE Reel Downloader logo"><span>ZEE <b>BOTS</b></span></a><p>Built for the moments worth keeping.</p><div class="footer-links"><a href="https://t.me/Instareelwithmp3convert_v3_bot" target="_blank" rel="noopener noreferrer">Telegram bot</a><a href="https://t.me/zeereeldownloader" target="_blank" rel="noopener noreferrer">Update channel</a><a href="https://www.instagram.com/risham004/" target="_blank" rel="noopener noreferrer">Instagram @risham004</a><span>Created by <strong>RISHAM004</strong> · © 2026 ZEE BOTS</span></div></footer>
+  <footer><a class="brand" href="#home"><img class="brand-logo" src="{{ url_for('static', filename='nexora-logo.png') }}" alt="NEXORA DOWNLOADER logo"><span>NEXORA <b>DOWNLOADER</b></span></a><p>Fast downloads. Smooth experience.</p><div class="footer-links"><a href="https://www.instagram.com/risham004/" target="_blank" rel="noopener noreferrer">Instagram @risham004</a><span>Created by <strong>RISHAM004</strong> · © 2026 NEXORA DOWNLOADER</span></div></footer>
   <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
