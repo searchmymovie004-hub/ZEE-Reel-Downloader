@@ -8,8 +8,10 @@ import time
 import uuid
 from collections import defaultdict, deque
 from functools import wraps
+from html import unescape
 from pathlib import Path
 from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 from flask import Flask, Response, jsonify, render_template, request, send_from_directory, session, redirect, url_for
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -130,9 +132,15 @@ def ffmpeg_path() -> str | None:
 
 
 def safe_media_path(token: str, kind: str) -> Path | None:
-    if not re.fullmatch(r"[a-f0-9]{32}", token) or kind not in {"video", "audio"}:
+    if not re.fullmatch(r"[a-f0-9]{32}", token) or kind not in {"video", "audio", "image"}:
         return None
-    candidate = (DOWNLOAD_DIR / token / f"{kind}.{'mp4' if kind == 'video' else 'mp3'}").resolve()
+    if kind == "image":
+        candidates = list((DOWNLOAD_DIR / token).glob("image.*"))
+        candidate = max(candidates, key=lambda path: path.stat().st_mtime).resolve() if candidates else None
+        if candidate is None:
+            return None
+    else:
+        candidate = (DOWNLOAD_DIR / token / f"{kind}.{'mp4' if kind == 'video' else 'mp3'}").resolve()
     try:
         candidate.relative_to(DOWNLOAD_DIR.resolve())
     except ValueError:
@@ -143,6 +151,45 @@ def safe_media_path(token: str, kind: str) -> Path | None:
 def find_output(directory: Path, suffix: str) -> Path | None:
     matches = [p for p in directory.iterdir() if p.is_file() and p.suffix.lower() == suffix]
     return max(matches, key=lambda p: p.stat().st_mtime) if matches else None
+
+
+def public_image_url(url: str) -> str | None:
+    """Read the public page's Open Graph image without accepting arbitrary URLs."""
+    request = Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; NEXORA Downloader/1.0)"})
+    with urlopen(request, timeout=20) as response:
+        page = response.read(2 * 1024 * 1024).decode("utf-8", "ignore")
+    matches = re.findall(
+        r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)', page, re.I
+    ) + re.findall(
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']', page, re.I
+    )
+    if not matches:
+        return None
+    image_url = unescape(matches[0]).replace("&amp;", "&")
+    host = (urlparse(image_url).hostname or "").lower()
+    if not (host.endswith(".fbcdn.net") or host.endswith(".cdninstagram.com") or host in INSTAGRAM_HOSTS):
+        return None
+    return image_url
+
+
+def process_image_post(url: str, token: str) -> Path:
+    work_dir = DOWNLOAD_DIR / token
+    work_dir.mkdir(mode=0o700, exist_ok=True)
+    image_url = public_image_url(url)
+    if not image_url:
+        raise RuntimeError("No public image was found for this post.")
+    request = Request(image_url, headers={"User-Agent": "Mozilla/5.0 (compatible; NEXORA Downloader/1.0)"})
+    with urlopen(request, timeout=25) as response:
+        content_type = (response.headers.get_content_type() or "").lower()
+        if content_type not in {"image/jpeg", "image/png", "image/webp"}:
+            raise RuntimeError("The public image format is unsupported.")
+        data = response.read(MAX_DOWNLOAD_BYTES + 1)
+    if not data or len(data) > MAX_DOWNLOAD_BYTES:
+        raise RuntimeError("The image is unavailable or exceeds the size limit.")
+    extension = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}[content_type]
+    image_path = work_dir / f"image.{extension}"
+    image_path.write_bytes(data)
+    return image_path
 
 
 def process_reel(url: str, token: str, video_quality: str = "best", audio_quality: str = "192") -> tuple[Path, Path]:
@@ -336,8 +383,17 @@ def api_download():
         return jsonify(success=False, error="Enter a valid public Instagram Reel, post, story, or IGTV URL."), 400
 
     token = uuid.uuid4().hex
+    media_type = "video"
     try:
-        process_reel(url, token, video_quality, audio_quality)
+        try:
+            process_reel(url, token, video_quality, audio_quality)
+        except yt_dlp.utils.DownloadError as exc:
+            # yt-dlp reports image-only Instagram posts as "There is no video".
+            # For those public posts, download the page's safe Open Graph image.
+            if "no video" not in str(exc).lower():
+                raise
+            process_image_post(url, token)
+            media_type = "image"
     except yt_dlp.utils.DownloadError as exc:
         METRICS["errors"] += 1
         shutil.rmtree(DOWNLOAD_DIR / token, ignore_errors=True)
@@ -357,12 +413,9 @@ def api_download():
         return jsonify(success=False, error="The Instagram media could not be processed right now. Please try again."), 500
 
     METRICS["downloads"] += 1
-    return jsonify(
-        success=True,
-        video_url=f"/media/{token}/video",
-        audio_url=f"/media/{token}/audio",
-        expires_in=FILE_TTL_SECONDS,
-    )
+    if media_type == "image":
+        return jsonify(success=True, media_type="image", image_url=f"/media/{token}/image", expires_in=FILE_TTL_SECONDS)
+    return jsonify(success=True, media_type="video", video_url=f"/media/{token}/video", audio_url=f"/media/{token}/audio", expires_in=FILE_TTL_SECONDS)
 
 
 @app.get("/media/<token>/<kind>")

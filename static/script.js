@@ -37,6 +37,7 @@ const wakeStatus = document.querySelector('#wake-status');
 const result = document.querySelector('#result');
 const videoLink = document.querySelector('#video-link');
 const audioLink = document.querySelector('#audio-link');
+const imageLink = document.querySelector('#image-link');
 const againButton = document.querySelector('#again-button');
 const copyLinkButton = document.querySelector('#copy-link-button');
 const shareResultButton = document.querySelector('#share-result-button');
@@ -189,8 +190,12 @@ form.addEventListener('submit', async event => {
     const response = await requestDownload(url, {url, video_quality: videoQuality.value, audio_quality: audioQuality.value});
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.success) throw new Error(data.error || 'Unable to process this media.');
-    videoLink.href = data.video_url; audioLink.href = data.audio_url; result.hidden = false; modalVideoLink.href = data.video_url; modalAudioLink.href = data.audio_url; resultModal.hidden = false;
-    saveHistory(url, data.video_url, data.audio_url);
+    const imageOnly = data.media_type === 'image';
+    videoLink.hidden = imageOnly; audioLink.hidden = imageOnly; imageLink.hidden = !imageOnly;
+    if (imageOnly) { imageLink.href = data.image_url; imageLink.textContent = 'Download image'; }
+    else { videoLink.href = data.video_url; audioLink.href = data.audio_url; modalVideoLink.href = data.video_url; modalAudioLink.href = data.audio_url; resultModal.hidden = false; }
+    result.hidden = false;
+    saveHistory(url, data.video_url || '', data.audio_url || data.image_url || '');
     recordSuccessfulDownload().catch(() => console.info('Download count could not be updated.'));
   } catch (error) { showError(error.message || 'The media could not be processed right now. Please try again.'); }
   finally { clearTimeout(wakeTimer); setWakeMessage(''); setLoading(false); }

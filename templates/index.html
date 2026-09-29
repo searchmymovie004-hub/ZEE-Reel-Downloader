@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <meta name="description" content="NEXORA DOWNLOADER downloads public Instagram Reels, posts, stories, and IGTV media as MP4 or MP3.">
+  <meta name="description" content="NEXORA DOWNLOADER downloads public Instagram Reels, image posts, stories, and IGTV media.">
   <meta name="keywords" content="Instagram downloader, Reel downloader, MP4, MP3, NEXORA">
   <meta name="google-site-verification" content="9r8XW3g8YytoRn7-m923CnxOIgA16n06yfOTkubQ7w4">
   <meta property="og:type" content="website">
@@ -27,7 +27,7 @@
   </header>
 
   <main id="home">
-    <section class="hero"><p class="eyebrow">Simple · Fast · Public media only</p><h1>Download Instagram media<br><span>without the clutter.</span></h1><p>Paste a public Instagram Reel, post, story, or IGTV link. Choose MP4 video or MP3 audio and download.</p><a class="button primary" href="#downloader">Start downloading ↓</a></section>
+    <section class="hero"><p class="eyebrow">Simple · Fast · Public media only</p><h1>Download Instagram media<br><span>without the clutter.</span></h1><p>Paste a public Instagram Reel, post, story, or IGTV link. Save video as MP4, audio as MP3, or image posts as JPG/PNG.</p><a class="button primary" href="#downloader">Start downloading ↓</a></section>
 
     <section id="downloader" class="section downloader-section">
       <div class="section-heading"><p class="eyebrow">01 / Downloader</p><h2>Paste your link</h2><p>Supports public Reels, posts, stories, and IGTV. No login required.</p></div>
@@ -43,7 +43,7 @@
         </form>
         <div id="status" class="status" role="alert" aria-live="polite"></div>
         <div id="queue-panel" class="queue-panel" hidden><strong>Download queue</strong><small id="queue-count">0 links</small><ol id="queue-list"></ol><button id="process-queue" class="button secondary" type="button">Process queue</button></div>
-        <div id="result" class="result-card" hidden><div class="success-line"><strong>Your media is ready</strong><span>Links expire automatically.</span></div><div class="result-links"><a id="video-link" class="button primary" download>Download MP4</a><a id="audio-link" class="button secondary" download>Download MP3</a></div><div class="share-options"><span>Share:</span><button id="share-result-button" type="button">Share result</button><button id="copy-link-button" type="button">Copy site link</button></div><button id="again-button" class="text-button" type="button">Download another</button></div>
+        <div id="result" class="result-card" hidden><div class="success-line"><strong>Your media is ready</strong><span>Links expire automatically.</span></div><div class="result-links"><a id="video-link" class="button primary" download>Download MP4</a><a id="audio-link" class="button secondary" download>Download MP3</a><a id="image-link" class="button primary" download hidden>Download image</a></div><div class="share-options"><span>Share:</span><button id="share-result-button" type="button">Share result</button><button id="copy-link-button" type="button">Copy site link</button></div><button id="again-button" class="text-button" type="button">Download another</button></div>
         <p class="legal-note">Use NEXORA only for content you created or have permission to save. <a href="{{ url_for('privacy') }}">Privacy policy</a></p>
       </div>
     </section>
@@ -53,7 +53,7 @@
     <section id="community" class="section"><div class="section-heading"><p class="eyebrow">03 / Community</p><h2>Simple feedback</h2><p>No login or account required.</p></div><div class="stats"><div><strong id="downloads-count">—</strong><span>Downloads</span></div><div><strong id="average-rating">—</strong><span>Average rating</span></div><div><strong id="review-count">—</strong><span>Reviews</span></div></div><div class="review-box"><form id="review-form" novalidate><div class="star-picker" role="radiogroup" aria-label="Choose a rating"><input id="star-5" type="radio" name="rating" value="5"><label for="star-5">★</label><input id="star-4" type="radio" name="rating" value="4"><label for="star-4">★</label><input id="star-3" type="radio" name="rating" value="3"><label for="star-3">★</label><input id="star-2" type="radio" name="rating" value="2"><label for="star-2">★</label><input id="star-1" type="radio" name="rating" value="1"><label for="star-1">★</label></div><textarea id="review-message" maxlength="280" placeholder="Your feedback (optional)"></textarea><button class="button primary review-button" type="submit">Submit review</button><div id="review-status" class="status" role="status"></div></form></div></section>
 
     <section id="how-it-works" class="section"><div class="section-heading"><p class="eyebrow">04 / How it works</p><h2>Three easy steps</h2></div><div class="steps"><article><b>1</b><h3>Copy the link</h3><p>Copy a public media link from Instagram.</p></article><article><b>2</b><h3>Paste it here</h3><p>Choose your video and audio quality.</p></article><article><b>3</b><h3>Save the file</h3><p>Download MP4 video or MP3 audio.</p></article></div></section>
-    <section id="faq" class="section faq"><div class="section-heading"><p class="eyebrow">05 / FAQ</p><h2>Good to know</h2></div><details open><summary>What links are supported?</summary><p>Public Instagram Reels, posts, IGTV links, and public stories when Instagram makes them available without login.</p></details><details><summary>Do I need an account?</summary><p>No. NEXORA does not ask for your Instagram password or account.</p></details><details><summary>Why can a public link fail?</summary><p>Instagram may rate-limit access or the content may be expired, restricted, or temporarily unavailable.</p></details></section>
+    <section id="faq" class="section faq"><div class="section-heading"><p class="eyebrow">05 / FAQ</p><h2>Good to know</h2></div><details open><summary>What links are supported?</summary><p>Public Instagram Reels, image or video posts, IGTV links, and public stories when Instagram makes them available without login.</p></details><details><summary>Do I need an account?</summary><p>No. NEXORA does not ask for your Instagram password or account.</p></details><details><summary>Why can a public link fail?</summary><p>Instagram may rate-limit access or the content may be expired, restricted, or temporarily unavailable.</p></details></section>
   </main>
 
   <div id="install-banner" class="utility-hidden" hidden><span>Install NEXORA</span><button id="install-button" type="button">Install</button><button id="dismiss-install" type="button">×</button></div><div id="result-modal" class="utility-hidden" hidden><button id="close-modal" type="button">×</button><a id="modal-video-link" download>MP4</a><a id="modal-audio-link" download>MP3</a></div>
