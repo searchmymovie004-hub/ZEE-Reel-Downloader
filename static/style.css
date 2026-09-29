@@ -45,3 +45,21 @@ footer .brand-logo{width:34px;height:34px}
 
 .quality-row{display:flex;gap:10px;margin-top:11px}.quality-row label{display:flex;align-items:center;gap:7px;flex:1;color:var(--muted);font-size:11px}.quality-row select{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;background:#0a0f1d;color:var(--text);padding:9px 8px;font:11px 'DM Sans';outline:0}.quality-row select:focus{border-color:var(--violet)}
 @media(max-width:700px){.quality-row{display:grid;grid-template-columns:1fr 1fr}.quality-row label{display:block}.quality-row select{display:block;margin-top:5px}}
+
+/* Full glassmorphism and smooth motion pass */
+:root{--glass:rgba(255,255,255,.065);--glass-strong:rgba(255,255,255,.105);--glass-border:rgba(255,255,255,.16)}
+body{background:radial-gradient(circle at 12% 5%,rgba(155,124,255,.22),transparent 29%),radial-gradient(circle at 88% 22%,rgba(110,231,248,.14),transparent 25%),radial-gradient(circle at 45% 92%,rgba(225,48,108,.11),transparent 30%),var(--bg)}
+body:before{opacity:.18;background-size:48px 48px;animation:gridDrift 28s linear infinite}
+.ambient{animation:ambientFloat 13s ease-in-out infinite alternate}.ambient-two{animation-delay:-6s}
+.site-header{background:rgba(8,11,22,.45);border-color:var(--glass-border);box-shadow:0 12px 40px rgba(0,0,0,.13)}
+.primary-button{position:relative;overflow:hidden}.header-cta,.paste-button,.clear-history,.share-options button,.share-options a{background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-color:var(--glass-border)}
+.downloader-card,.review-panel,.stat-card,.feature-grid>div,.history-row{background:linear-gradient(135deg,rgba(255,255,255,.105),rgba(255,255,255,.035));border-color:var(--glass-border);backdrop-filter:blur(22px) saturate(130%);-webkit-backdrop-filter:blur(22px) saturate(130%);box-shadow:0 20px 70px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.13)}
+.input-wrap,.review-form textarea,.quality-row select{background:rgba(4,8,18,.44);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.telegram-button,.channel-button,.instagram-button,.format-button{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-color:var(--glass-border)}
+.hero .eyebrow,.hero h1,.hero-copy,.hero-button,.telegram-actions,.hero-note{animation:fadeUp .75s cubic-bezier(.2,.75,.25,1) both}.hero h1{animation-delay:.08s}.hero-copy{animation-delay:.16s}.hero-button{animation-delay:.24s}.telegram-actions{animation-delay:.32s}.hero-note{animation-delay:.4s}
+.downloader-card,.content-section,.faq-section{animation:softReveal .7s ease both;animation-timeline:view();animation-range:entry 0% cover 22%}
+.card-icon{animation:iconFloat 4s ease-in-out infinite}.pulse-dot{animation:dotPulse 2s ease-in-out infinite}
+.feature-grid>div,.stat-card,.steps article,.format-button,.telegram-button,.channel-button,.instagram-button{will-change:transform;transition:transform .28s cubic-bezier(.2,.8,.2,1),border-color .28s,box-shadow .28s,background .28s}.feature-grid>div:hover,.stat-card:hover{transform:translateY(-7px) scale(1.01);box-shadow:0 25px 65px rgba(0,0,0,.3),0 0 0 1px rgba(200,248,92,.12),inset 0 1px rgba(255,255,255,.2)}
+.telegram-button:hover,.channel-button:hover,.instagram-button:hover,.format-button:hover{box-shadow:0 20px 48px rgba(0,0,0,.3),0 0 0 1px rgba(110,231,248,.16)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}@keyframes softReveal{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}@keyframes ambientFloat{from{transform:translate3d(-12px,-8px,0) scale(.96)}to{transform:translate3d(15px,14px,0) scale(1.06)}}@keyframes iconFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-5px) rotate(-4deg)}}@keyframes dotPulse{0%,100%{box-shadow:0 0 0 6px rgba(200,248,92,.1)}50%{box-shadow:0 0 0 11px rgba(200,248,92,.02)}}@keyframes gridDrift{from{background-position:0 0}to{background-position:48px 48px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
